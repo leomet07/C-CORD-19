@@ -7,6 +7,55 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+//#include <regex.h>
+
+char *str_slice(char str[], int slice_from, int slice_to)
+{
+    // if a string is empty, returns nothing
+    if (str[0] == '\0')
+        return NULL;
+
+    char *buffer;
+    size_t str_len, buffer_len;
+
+    // for negative indexes "slice_from" must be less "slice_to"
+    if (slice_to < 0 && slice_from < slice_to)
+    {
+        str_len = strlen(str);
+
+        // if "slice_to" goes beyond permissible limits
+        if (abs(slice_to) > str_len - 1)
+            return NULL;
+
+        // if "slice_from" goes beyond permissible limits
+        if (abs(slice_from) > str_len)
+            slice_from = (-1) * str_len;
+
+        buffer_len = slice_to - slice_from;
+        str += (str_len + slice_from);
+
+        // for positive indexes "slice_from" must be more "slice_to"
+    }
+    else if (slice_from >= 0 && slice_to > slice_from)
+    {
+        str_len = strlen(str);
+
+        // if "slice_from" goes beyond permissible limits
+        if (slice_from > str_len - 1)
+            return NULL;
+
+        buffer_len = slice_to - slice_from;
+        str += slice_from;
+
+        // otherwise, returns NULL
+    }
+    else
+        return NULL;
+
+    buffer = calloc(buffer_len, sizeof(char));
+    strncpy(buffer, str, buffer_len);
+    return buffer;
+}
 
 int is_regular_file(const char *path)
 {
@@ -17,7 +66,7 @@ int is_regular_file(const char *path)
 
 void parse_array(cJSON *array)
 {
-    printf("Parse time: \n");
+    //printf("Parse time: \n");
     cJSON *item = array ? array->child : 0;
     while (item)
     {
@@ -30,14 +79,75 @@ void parse_array(cJSON *array)
         char *string = cJSON_Print(text);
         //printf("Entry: %s \n\n", string);
 
+        // split into sentences
+        /*
+        char *token = strtok(string, ".");
+        // loop through the string to extract all other tokens
+        while (token != NULL)
+        {
+            printf("SENTENCE:  %s\n", token); //printing each token
+            token = strtok(NULL, ".");
+        }
+        */
+
+        int length = strlen(string);
+        char sentences[15][100];
+
+        int prev_scentence_index = 0;
+
+        //do not check for sentence end if last char (there wont be a char in front)
+        for (int i = 0; i < length - 1; i++)
+        {
+
+            // for every char, check if it marks a new sentence
+            if (string[i] == '.' && string[i + 1] == ' ')
+            {
+
+                char *sentence = str_slice(string, prev_scentence_index, i);
+                //printf("Sentence: %s\n", newstr);
+                if (strlen(sentence) < 400)
+                {
+                    if (strstr(sentence, "incubation") != NULL)
+                    {
+                        if (strstr(sentence, "day") != NULL)
+                        {
+                            /*
+                            printf("----------------------------------------------\n");
+
+                            printf("\nEntry: %s \n", sentence);
+                            printf("................................................\n");
+                            printf("^^^^Contains incubation days : \n");
+                            */
+
+                            // find (if and) where days is mentioned
+                            char word[] = "day";
+                            int word_len = strlen(word);
+                            int sent_len = strlen(sentence);
+
+                            for (int j = 0; j < sent_len - word_len; j++)
+                            {
+                                char *word_portion = str_slice(sentence, j, j + word_len);
+                                //printf("Word portion: %s\n", word_portion);
+                                if (strcmp(word_portion, word) == 0)
+                                {
+                                    printf("Incubation days: %s\n", sentence);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                prev_scentence_index = i;
+                //sentence_amount += 1;
+            }
+        }
+        /*
+        //if sentecne speaks about incubation, the days amnt that is spoken inside refers to the incubation
+       
+        */
+
         item = item->next;
     }
-}
-/* Print all the dirs starting from <path> [maybe recursive]. */
-int get_dirs()
-{
-
-    return 0;
 }
 
 int main()
@@ -118,71 +228,86 @@ int main()
         {
             while ((dir = readdir(d)) != NULL)
             {
-                char filename[90];
-                strcpy(filename, dir->d_name);
+                char filename_from_data_dir[90];
+                strcpy(filename_from_data_dir, dir->d_name);
 
                 //check if its not a special file
-                if (filename[0] != '.')
+                if (filename_from_data_dir[0] != '.')
                 {
-                    printf("File: %s\n", filename);
+                    //printf("File: %s\n", filename_from_data_dir);
+
+                    //parse file
+                    /* declare a file pointer */
+                    FILE *infile;
+                    char *buffer;
+                    long numbytes;
+
+                    /* open an existing file for reading */
+
+                    //create full path
+                    char path_to_file[90] = "";
+                    strcat(path_to_file, path_to_dir);
+                    strcat(path_to_file, "/");
+
+                    strcat(path_to_file, filename_from_data_dir);
+                    printf("Opening %s \n", path_to_file);
+                    infile = fopen(path_to_file, "r");
+
+                    /* quit if the file does not exist */
+                    if (infile == NULL)
+                    {
+                        printf("File with path %s doesn't exist. ", path_to_file);
+                        return 1;
+                    }
+
+                    /* Get the number of bytes */
+                    fseek(infile, 0L, SEEK_END);
+                    numbytes = ftell(infile);
+
+                    /* reset the file position indicator to 
+                    the beginning of the file */
+                    fseek(infile, 0L, SEEK_SET);
+
+                    /* grab sufficient memory for the 
+                    buffer to hold the text */
+                    buffer = (char *)calloc(numbytes, sizeof(char));
+
+                    /* memory error */
+                    if (buffer == NULL)
+                        return 1;
+
+                    /* copy all the text into the buffer */
+                    fread(buffer, sizeof(char), numbytes, infile);
+                    fclose(infile);
+
+                    /* confirm we have read the file by
+                    outputing it to the console */
+
+                    //VALUE IS IN BUFFER
+
+                    //printf("\nThe file called test.dat contains this text\n\n");
+
+                    cJSON *json = cJSON_Parse(buffer);
+                    /* free the memory we used for the buffer */
+                    free(buffer);
+
+                    char *string = cJSON_Print(json);
+                    if (string == NULL)
+                    {
+                        fprintf(stderr, "Failed to print monitor.\n");
+                    }
+                    //printf("CJSONP: %s \n", string);
+
+                    parse_array(cJSON_GetObjectItem(json, "body_text"));
+
+                    // remember to deallocate
+                    cJSON_Delete(json);
+
+                    // FOR DEVELOPMENT in 1 file
+                    //break;
                 }
             }
             closedir(d);
         }
-
-        /* declare a file pointer */
-        FILE *infile;
-        char *buffer;
-        long numbytes;
-
-        /* open an existing file for reading */
-        infile = fopen("large.json", "r");
-
-        /* quit if the file does not exist */
-        if (infile == NULL)
-            return 1;
-
-        /* Get the number of bytes */
-        fseek(infile, 0L, SEEK_END);
-        numbytes = ftell(infile);
-
-        /* reset the file position indicator to 
-the beginning of the file */
-        fseek(infile, 0L, SEEK_SET);
-
-        /* grab sufficient memory for the 
-buffer to hold the text */
-        buffer = (char *)calloc(numbytes, sizeof(char));
-
-        /* memory error */
-        if (buffer == NULL)
-            return 1;
-
-        /* copy all the text into the buffer */
-        fread(buffer, sizeof(char), numbytes, infile);
-        fclose(infile);
-
-        /* confirm we have read the file by
-    outputing it to the console */
-
-        //VALUE IS IN BUFFER
-
-        printf("\nThe file called test.dat contains this text\n\n");
-
-        cJSON *json = cJSON_Parse(buffer);
-        /* free the memory we used for the buffer */
-        free(buffer);
-
-        char *string = cJSON_Print(json);
-        if (string == NULL)
-        {
-            fprintf(stderr, "Failed to print monitor.\n");
-        }
-        //printf("CJSONP: %s \n", string);
-
-        parse_array(cJSON_GetObjectItem(json, "body_text"));
-
-        // remember to deallocate
-        cJSON_Delete(json);
     }
 }

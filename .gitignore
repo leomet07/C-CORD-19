@@ -4,3 +4,4 @@ biorxiv_medrxiv/
 biorxiv_medrxiv
 
 *.exe
+regextest.c
