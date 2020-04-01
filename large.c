@@ -97,83 +97,92 @@ int main()
     for (int i = 0; i < size; i++)
     {
 
-        printf("Name: %s\n", names[i]);
-    }
+        char name[100];
+        strcpy(name, names[i]);
+        printf("Folder Name: %s\n", name);
+        char dirname[25];
 
-    char dirname[25] = "biorxiv_medrxiv";
-    char path_to_dir[90] = "";
+        strcpy(dirname, name);
+        char path_to_dir[90] = "";
 
-    //IN DATASET DIR, there is only 1 folder with the same name that has files
-    strcat(path_to_dir, dirname);
-    strcat(path_to_dir, "/");
-    strcat(path_to_dir, dirname);
+        //IN DATASET DIR, there is only 1 folder with the same name that has files
+        strcat(path_to_dir, dirname);
+        strcat(path_to_dir, "/");
+        strcat(path_to_dir, dirname);
 
-    printf("PATH TO DIR: %s\n", path_to_dir);
-    DIR *d;
-    struct dirent *dir;
-    d = opendir(path_to_dir);
-    if (d)
-    {
-        while ((dir = readdir(d)) != NULL)
+        printf("PATH TO DIR: %s\n", path_to_dir);
+        DIR *d;
+        struct dirent *dir;
+        d = opendir(path_to_dir);
+        if (d)
         {
-            char filename[90];
-            //printf("%s\n", dir->d_name);
+            while ((dir = readdir(d)) != NULL)
+            {
+                char filename[90];
+                strcpy(filename, dir->d_name);
+
+                //check if its not a special file
+                if (filename[0] != '.')
+                {
+                    printf("File: %s\n", filename);
+                }
+            }
+            closedir(d);
         }
-        closedir(d);
-    }
 
-    /* declare a file pointer */
-    FILE *infile;
-    char *buffer;
-    long numbytes;
+        /* declare a file pointer */
+        FILE *infile;
+        char *buffer;
+        long numbytes;
 
-    /* open an existing file for reading */
-    infile = fopen("large.json", "r");
+        /* open an existing file for reading */
+        infile = fopen("large.json", "r");
 
-    /* quit if the file does not exist */
-    if (infile == NULL)
-        return 1;
+        /* quit if the file does not exist */
+        if (infile == NULL)
+            return 1;
 
-    /* Get the number of bytes */
-    fseek(infile, 0L, SEEK_END);
-    numbytes = ftell(infile);
+        /* Get the number of bytes */
+        fseek(infile, 0L, SEEK_END);
+        numbytes = ftell(infile);
 
-    /* reset the file position indicator to 
+        /* reset the file position indicator to 
 the beginning of the file */
-    fseek(infile, 0L, SEEK_SET);
+        fseek(infile, 0L, SEEK_SET);
 
-    /* grab sufficient memory for the 
+        /* grab sufficient memory for the 
 buffer to hold the text */
-    buffer = (char *)calloc(numbytes, sizeof(char));
+        buffer = (char *)calloc(numbytes, sizeof(char));
 
-    /* memory error */
-    if (buffer == NULL)
-        return 1;
+        /* memory error */
+        if (buffer == NULL)
+            return 1;
 
-    /* copy all the text into the buffer */
-    fread(buffer, sizeof(char), numbytes, infile);
-    fclose(infile);
+        /* copy all the text into the buffer */
+        fread(buffer, sizeof(char), numbytes, infile);
+        fclose(infile);
 
-    /* confirm we have read the file by
+        /* confirm we have read the file by
     outputing it to the console */
 
-    //VALUE IS IN BUFFER
+        //VALUE IS IN BUFFER
 
-    printf("\nThe file called test.dat contains this text\n\n");
+        printf("\nThe file called test.dat contains this text\n\n");
 
-    cJSON *json = cJSON_Parse(buffer);
-    /* free the memory we used for the buffer */
-    free(buffer);
+        cJSON *json = cJSON_Parse(buffer);
+        /* free the memory we used for the buffer */
+        free(buffer);
 
-    char *string = cJSON_Print(json);
-    if (string == NULL)
-    {
-        fprintf(stderr, "Failed to print monitor.\n");
+        char *string = cJSON_Print(json);
+        if (string == NULL)
+        {
+            fprintf(stderr, "Failed to print monitor.\n");
+        }
+        //printf("CJSONP: %s \n", string);
+
+        parse_array(cJSON_GetObjectItem(json, "body_text"));
+
+        // remember to deallocate
+        cJSON_Delete(json);
     }
-    //printf("CJSONP: %s \n", string);
-
-    parse_array(cJSON_GetObjectItem(json, "body_text"));
-
-    // remember to deallocate
-    cJSON_Delete(json);
 }
