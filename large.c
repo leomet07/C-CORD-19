@@ -56,7 +56,7 @@ void parse_array(cJSON *array)
         // split into sentences
 
         int length = strlen(string);
-        char sentences[15][100];
+        //char sentences[];
 
         int prev_scentence_index = 0;
 
@@ -70,17 +70,19 @@ void parse_array(cJSON *array)
 
                 char *sentence = str_slice(string, prev_scentence_index, i);
 
-                // any kinf of usage with sentence will cause the program to crash after ~1500 files
+                // any kinf of usage with sentence var  will cause the program to crash after ~1500 files
+                int sentlen = strlen(sentence);
                 //printf("Sentence: %s\n", sentence);
+
                 // ^^^^^^ example usage
 
                 //example of what i want
-                char sentence_two[] = "This is some text. ";
+
                 //all str funcs should work
-                printf("Sentence: %s%d\n", sentence_two, strlen(sentence_two));
+                // /printf("Sentence: %s%d\n", sentence_two, strlen(sentence_two));
 
                 //int sentlen = strlen(sentence);
-                /*
+
                 if (sentlen < 400)
                 {
                     // if incubation in sentence
@@ -89,7 +91,6 @@ void parse_array(cJSON *array)
 
                         if (strstr(sentence, "day") != NULL)
                         {
-                            
 
                             // find (if and) where days is mentioned
                             char word[] = "day";
@@ -142,13 +143,11 @@ void parse_array(cJSON *array)
                                     //amnt++;
                                     //total_incubation = total_incubation + inc_val;
                                 }
-                            
                             }
-                            
                         }
                     }
                 }
-                */
+                free(sentence);
                 prev_scentence_index = i;
                 //sentence_amount += 1;
             }
@@ -324,7 +323,7 @@ int main()
 
                     cJSON *texts = cJSON_GetObjectItemCaseSensitive(json, "body_text");
                     //parse_array(cJSON_GetObjectItem(json, "body_text"));
-                    parse_array(texts);
+                    //parse_array(texts);
                     //cJSON_Delete(texts);
                     // remember to deallocate
                     //cJSON_Delete(texts);
