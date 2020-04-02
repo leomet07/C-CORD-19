@@ -5,3 +5,9 @@ biorxiv_medrxiv
 
 *.exe
 regextest.c
+large.json
+main.c
+regextest.c
+test.c
+
+.gitignore

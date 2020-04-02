@@ -1,4 +1,5 @@
-// to compile gcc cJSON.c large.c -lm && a.exe
+// to compile:
+// gcc cJSON.c large.c -lm && a.exe
 #include <dirent.h>
 #include <stdio.h>
 #include <stdlib.h>
