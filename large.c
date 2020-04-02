@@ -10,7 +10,7 @@
 #include <unistd.h>
 //#include <regex.h>
 double total_incubation = 0;
-long amnt = 0;
+long amnt = 1;
 char *str_slice(char str[], int slice_from, int slice_to)
 {
     // if a string is empty, returns nothing
@@ -75,23 +75,10 @@ void parse_array(cJSON *array)
     {
         cJSON *text = cJSON_GetObjectItem(item, "text");
 
-        /*cJSON *index = cJSON_GetObjectItem(item, "index");
-        cJSON *optional = cJSON_GetObjectItem(item, "optional");
-        
-        */
         char *string = cJSON_Print(text);
         //printf("Entry: %s \n\n", string);
 
         // split into sentences
-        /*
-        char *token = strtok(string, ".");
-        // loop through the string to extract all other tokens
-        while (token != NULL)
-        {
-            printf("SENTENCE:  %s\n", token); //printing each token
-            token = strtok(NULL, ".");
-        }
-        */
 
         int length = strlen(string);
         char sentences[15][100];
@@ -105,22 +92,20 @@ void parse_array(cJSON *array)
             // for every char, check if it marks a new sentence
             if (string[i] == '.' && string[i + 1] == ' ')
             {
-
+                /*
                 char *sentence = str_slice(string, prev_scentence_index, i);
+
                 //printf("Sentence: %s\n", newstr);
-                if (strlen(sentence) < 400)
+
+                int sentlen = strlen(sentence);
+                if (sentlen < 400)
                 {
-                    if (strstr(sentence, "incubation") != NULL)
+
+                    if (1)
                     {
+                        
                         if (strstr(sentence, "day") != NULL)
                         {
-                            /*
-                            printf("----------------------------------------------\n");
-
-                            printf("\nEntry: %s \n", sentence);
-                            printf("................................................\n");
-                            printf("^^^^Contains incubation days : \n");
-                            */
 
                             // find (if and) where days is mentioned
                             char word[] = "day";
@@ -139,7 +124,7 @@ void parse_array(cJSON *array)
                                     //printf("Incubation days: %s\n", sentence);
 
                                     char *before_portion = str_slice(sentence, j - total_digits_allowed - 1, j);
-                                    printf("Before portion: %s\n", before_portion);
+                                    //printf("Before portion: %s\n", before_portion);
 
                                     const int unformatted_num_len = strlen(before_portion);
 
@@ -162,41 +147,44 @@ void parse_array(cJSON *array)
                                     }
                                     float_str[unformatted_num_len - 1] = '\0';
 
-                                    printf("Float str: %s\n", float_str);
+                                    //printf("Float str: %s\n", float_str);
 
                                     //convert float to str
 
-                                    float inc_val;
+                                    float inc_val = 0;
                                     sscanf(float_str, "%f", &inc_val);
 
                                     printf("Float: %9.6f \n", inc_val);
-                                    amnt++;
-                                    total_incubation = total_incubation + inc_val;
+                                    //amnt++;
+                                    //total_incubation = total_incubation + inc_val;
                                 }
                             }
                         }
+                        
                     }
                 }
-
+                */
                 prev_scentence_index = i;
                 //sentence_amount += 1;
             }
         }
-        /*
-        //if sentecne speaks about incubation, the days amnt that is spoken inside refers to the incubation
-       
-        */
 
         item = item->next;
     }
+
+    //cJSON_Delete(array);
+    //free(array);
 }
 
+long filenum = 0;
 int main()
 {
 
+    char dircontainer[] = "C:\\Users\\leome\\Downloads\\CORD-19-research-challenge\\";
+
     struct dirent *direntp = NULL;
     DIR *dirp = NULL;
-    dirp = opendir(".");
+    dirp = opendir(dircontainer);
 
     int dir_amnt = 0;
 
@@ -221,7 +209,7 @@ int main()
 
     struct dirent *direntp2 = NULL;
     DIR *dirp2 = NULL;
-    dirp2 = opendir(".");
+    dirp2 = opendir(dircontainer);
 
     int index = 0;
     while ((direntp2 = readdir(dirp2)) != NULL)
@@ -257,6 +245,8 @@ int main()
         char path_to_dir[90] = "";
 
         //IN DATASET DIR, there is only 1 folder with the same name that has files
+
+        strcat(path_to_dir, dircontainer);
         strcat(path_to_dir, dirname);
         strcat(path_to_dir, "/");
         strcat(path_to_dir, dirname);
@@ -269,6 +259,7 @@ int main()
         {
             while ((dir = readdir(d)) != NULL)
             {
+                printf("Starting to read\n");
                 char filename_from_data_dir[90];
                 strcpy(filename_from_data_dir, dir->d_name);
 
@@ -291,8 +282,9 @@ int main()
                     strcat(path_to_file, "/");
 
                     strcat(path_to_file, filename_from_data_dir);
-                    printf("Opening %s \n", path_to_file);
+                    //printf("Opening %s \n", path_to_file);
                     infile = fopen(path_to_file, "r");
+                    printf("Filenum %d\n", filenum);
 
                     /* quit if the file does not exist */
                     if (infile == NULL)
@@ -315,7 +307,10 @@ int main()
 
                     /* memory error */
                     if (buffer == NULL)
+                    {
+                        printf("Memory error \n");
                         return 1;
+                    }
 
                     /* copy all the text into the buffer */
                     fread(buffer, sizeof(char), numbytes, infile);
@@ -331,21 +326,28 @@ int main()
                     cJSON *json = cJSON_Parse(buffer);
                     /* free the memory we used for the buffer */
                     free(buffer);
+                    printf("Deallocated\n");
 
+                    /*
                     char *string = cJSON_Print(json);
                     if (string == NULL)
                     {
                         fprintf(stderr, "Failed to print monitor.\n");
                     }
+                    */
                     //printf("CJSONP: %s \n", string);
 
-                    parse_array(cJSON_GetObjectItem(json, "body_text"));
-
+                    cJSON *texts = cJSON_GetObjectItemCaseSensitive(json, "body_text");
+                    //parse_array(cJSON_GetObjectItem(json, "body_text"));
+                    parse_array(texts);
+                    //cJSON_Delete(texts);
                     // remember to deallocate
+                    //cJSON_Delete(texts);
                     cJSON_Delete(json);
 
                     // FOR DEVELOPMENT in 1 file
                     //break;
+                    filenum++;
                 }
             }
             closedir(d);
