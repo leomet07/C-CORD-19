@@ -8,7 +8,8 @@
 #include <sys/stat.h>
 #include <unistd.h>
 //#include <regex.h>
-
+double total_incubation = 0;
+long amnt = 0;
 char *str_slice(char str[], int slice_from, int slice_to)
 {
     // if a string is empty, returns nothing
@@ -68,6 +69,7 @@ void parse_array(cJSON *array)
 {
     //printf("Parse time: \n");
     cJSON *item = array ? array->child : 0;
+
     while (item)
     {
         cJSON *text = cJSON_GetObjectItem(item, "text");
@@ -167,6 +169,8 @@ void parse_array(cJSON *array)
                                     sscanf(float_str, "%f", &inc_val);
 
                                     printf("Float: %9.6f \n", inc_val);
+                                    amnt++;
+                                    total_incubation = total_incubation + inc_val;
                                 }
                             }
                         }
@@ -346,4 +350,8 @@ int main()
             closedir(d);
         }
     }
+
+    //calculate avg
+    double avg = total_incubation / amnt;
+    printf("Avg: %9.6f \n", avg);
 }
