@@ -92,18 +92,23 @@ void parse_array(cJSON *array)
             // for every char, check if it marks a new sentence
             if (string[i] == '.' && string[i + 1] == ' ')
             {
-                /*
+
                 char *sentence = str_slice(string, prev_scentence_index, i);
 
                 //printf("Sentence: %s\n", newstr);
+                // MEMORY LEAK CAUSED BY THE LINE BELOW
+                //int sentlen = strlen(sentence);
+                // MEMORY LEAK CAUSED BY THE LINE ABOVE^^^^^^^^^^^^^^^^^^^^^^^^^
 
-                int sentlen = strlen(sentence);
+                //my version
+                int sentlen = strlen(text);
+                /*
                 if (sentlen < 400)
                 {
-
+                    
                     if (1)
                     {
-                        
+                       
                         if (strstr(sentence, "day") != NULL)
                         {
 
@@ -162,8 +167,10 @@ void parse_array(cJSON *array)
                         }
                         
                     }
+                    
                 }
                 */
+
                 prev_scentence_index = i;
                 //sentence_amount += 1;
             }
