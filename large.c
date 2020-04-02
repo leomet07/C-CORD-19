@@ -124,13 +124,49 @@ void parse_array(cJSON *array)
                             int word_len = strlen(word);
                             int sent_len = strlen(sentence);
 
-                            for (int j = 0; j < sent_len - word_len; j++)
+                            //includes decimal point
+                            int total_digits_allowed = 3;
+                            //printf("Incubation days: %s\n", sentence);
+                            for (int j = total_digits_allowed - 1; j < sent_len - word_len; j++)
                             {
                                 char *word_portion = str_slice(sentence, j, j + word_len);
                                 //printf("Word portion: %s\n", word_portion);
                                 if (strcmp(word_portion, word) == 0)
                                 {
-                                    printf("Incubation days: %s\n", sentence);
+                                    //printf("Incubation days: %s\n", sentence);
+
+                                    char *before_portion = str_slice(sentence, j - total_digits_allowed - 1, j);
+                                    printf("Before portion: %s\n", before_portion);
+
+                                    const int unformatted_num_len = strlen(before_portion);
+
+                                    char float_str[unformatted_num_len];
+
+                                    int good_vals = 0;
+                                    for (int k = 0; k < unformatted_num_len; k++)
+                                    {
+                                        // get ascii val
+                                        char val = before_portion[k];
+                                        float_str[k] = ' ';
+                                        if (((int)val >= 48 && (int)val <= 57) || (int)val == 46)
+                                        {
+                                            printf("Val %c is a digit/decimal point \n", val);
+                                            //fill float with blank just in case; it can be overrided
+
+                                            float_str[good_vals] = val;
+                                            good_vals++;
+                                        }
+                                    }
+                                    float_str[unformatted_num_len - 1] = '\0';
+
+                                    printf("Float str: %s\n", float_str);
+
+                                    //convert float to str
+
+                                    float inc_val;
+                                    sscanf(float_str, "%f", &inc_val);
+
+                                    printf("Float: %9.6f \n", inc_val);
                                 }
                             }
                         }
