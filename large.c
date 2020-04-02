@@ -40,7 +40,16 @@ int is_regular_file(const char *path)
     stat(path, &path_stat);
     return S_ISREG(path_stat.st_mode);
 }
-
+int mystrlen(char *p)
+{
+    int c = 0;
+    while (*p != '\0')
+    {
+        c++;
+        *p++;
+    }
+    return (c);
+}
 void parse_array(cJSON *array)
 {
     //printf("Parse time: \n");
@@ -71,7 +80,7 @@ void parse_array(cJSON *array)
                 char *sentence = str_slice(string, prev_scentence_index, i);
 
                 // any kinf of usage with sentence var  will cause the program to crash after ~1500 files
-                int sentlen = strlen(sentence);
+                //int sentlen = strlen(sentence);
                 //printf("Sentence: %s\n", sentence);
 
                 // ^^^^^^ example usage
@@ -81,12 +90,18 @@ void parse_array(cJSON *array)
                 //all str funcs should work
                 // /printf("Sentence: %s%d\n", sentence_two, strlen(sentence_two));
 
-                //int sentlen = strlen(sentence);
+                int sentlen = strlen(sentence);
+                //printf("Full sent length %d \n", sentlen);
+                //int sentlen = mystrlen(sentence);
 
+                //size_t sentlen = strlen(sentence);
+                //printf("Sentence: %s\n", sentence);
+                /*
                 if (sentlen < 400)
                 {
+                    //printf("Under 400\n");
                     // if incubation in sentence
-                    if (1)
+                    if (strstr(sentence, "incubation") != NULL)
                     {
 
                         if (strstr(sentence, "day") != NULL)
@@ -102,6 +117,7 @@ void parse_array(cJSON *array)
                             //printf("Incubation days: %s\n", sentence);
                             for (int j = total_digits_allowed - 1; j < sent_len - word_len; j++)
                             {
+                                
                                 char *word_portion = str_slice(sentence, j, j + word_len);
                                 //printf("Word portion: %s\n", word_portion);
                                 if (strcmp(word_portion, word) == 0)
@@ -143,12 +159,16 @@ void parse_array(cJSON *array)
                                     //amnt++;
                                     //total_incubation = total_incubation + inc_val;
                                 }
+                                free(word_portion);
+                                
                             }
                         }
                     }
                 }
+                */
                 free(sentence);
-                prev_scentence_index = i;
+                //free(sentlen);
+                //prev_scentence_index = i;
                 //sentence_amount += 1;
             }
         }
@@ -311,20 +331,20 @@ int main()
                     /* free the memory we used for the buffer */
                     free(buffer);
                     printf("Deallocated\n");
-
                     /*
                     char *string = cJSON_Print(json);
                     if (string == NULL)
                     {
                         fprintf(stderr, "Failed to print monitor.\n");
                     }
+
+                    printf("CJSONP: %s \n", string);
                     */
-                    //printf("CJSONP: %s \n", string);
 
                     cJSON *texts = cJSON_GetObjectItemCaseSensitive(json, "body_text");
                     //parse_array(cJSON_GetObjectItem(json, "body_text"));
-                    //parse_array(texts);
-                    //cJSON_Delete(texts);
+                    parse_array(texts);
+                    //scJSON_Delete(texts);
                     // remember to deallocate
                     //cJSON_Delete(texts);
                     cJSON_Delete(json);
