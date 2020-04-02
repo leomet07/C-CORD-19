@@ -97,13 +97,8 @@ void parse_array(cJSON *array)
 
                 // any kinf of usage with sentence will cause the program to crash after ~1500 files
                 //printf("Sentence: %s\n", sentence);
+                // ^^^^^^ example usage
 
-                //printf("Sentence: %s\n", newstr);
-                // MEMORY LEAK CAUSED BY THE LINE BELOW
-                //int sentlen = strlen(sentence);
-                // MEMORY LEAK CAUSED BY THE LINE ABOVE^^^^^^^^^^^^^^^^^^^^^^^^^
-
-                //my version
                 //int sentlen = strlen(sentence);
                 /*
                 if (sentlen < 400)
