@@ -81,7 +81,7 @@ void parse_array(cJSON *array)
 
                 // any kinf of usage with sentence var  will cause the program to crash after ~1500 files
                 //int sentlen = strlen(sentence);
-                //printf("Sentence: %s\n", sentence);
+                //printf("Sentence: %s\n\n", sentence);
 
                 // ^^^^^^ example usage
 
@@ -90,9 +90,9 @@ void parse_array(cJSON *array)
                 //all str funcs should work
                 // /printf("Sentence: %s%d\n", sentence_two, strlen(sentence_two));
 
+                //int sentlen = strlen(string);
+                //printf("Full sent length %d \n", string);
                 int sentlen = strlen(sentence);
-                //printf("Full sent length %d \n", sentlen);
-                //int sentlen = mystrlen(sentence);
 
                 //size_t sentlen = strlen(sentence);
                 //printf("Sentence: %s\n", sentence);
@@ -168,7 +168,7 @@ void parse_array(cJSON *array)
                 */
                 free(sentence);
                 //free(sentlen);
-                //prev_scentence_index = i;
+                prev_scentence_index = i;
                 //sentence_amount += 1;
             }
         }
