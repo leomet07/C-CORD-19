@@ -1,16 +1,22 @@
 // to compile:
-// gcc cJSON.c large.c -lm && a.exe
+// g++ cJSON.c new.cpp -lm && a.exe
 #include <dirent.h>
-#include <stdio.h>
+#include <cstdio>
 #include <stdlib.h>
-#include "cJSON.h"
-#include <string.h>
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+
+#include "cJSON.h"
+#include <iostream>
+#include <string.h>
+#include <vector>
+using namespace std;
 //#include <regex.h>
 double total_incubation = 0;
 long amnt = 1;
+/*
 char *str_slice(char str[], int slice_from, int slice_to)
 {
 
@@ -33,25 +39,17 @@ char *str_slice(char str[], int slice_from, int slice_to)
     strncpy(buffer, str, buffer_len);
     return buffer;
 }
-
+*/
 int is_regular_file(const char *path)
 {
     struct stat path_stat;
     stat(path, &path_stat);
     return S_ISREG(path_stat.st_mode);
 }
-int mystrlen(char *p)
-{
-    int c = 0;
-    while (*p != '\0')
-    {
-        c++;
-        *p++;
-    }
-    return (c);
-}
+
 void parse_array(cJSON *array)
 {
+
     //printf("Parse time: \n");
     cJSON *item = array ? array->child : 0;
 
@@ -60,7 +58,8 @@ void parse_array(cJSON *array)
         cJSON *text = cJSON_GetObjectItem(item, "text");
 
         char *string_text = cJSON_Print(text);
-        //printf("Entry: %s \n\n", string_text);
+        std::string string_text_str = string_text;
+        //printf("Entry: %s \n", string_text);
 
         // split into sentences
 
@@ -70,6 +69,7 @@ void parse_array(cJSON *array)
         int prev_scentence_index = 0;
 
         //do not check for sentence end if last char (there wont be a char in front)
+        vector<string> total_sentences;
         for (int i = 0; i < length - 1; i++)
         {
 
@@ -77,101 +77,33 @@ void parse_array(cJSON *array)
             if (string_text[i] == '.' && string_text[i + 1] == ' ')
             {
 
-                char *sentence = str_slice(string_text, prev_scentence_index, i);
+                string sentence = string_text_str.substr(prev_scentence_index, i);
+                //cout << "Sent: " << sentence << endl;
+                int sent_len = sentence.size();
 
-                // any kinf of usage with sentence var  will cause the program to crash after ~1500 files
-                //int sentlen = strlen(sentence);
-                //printf("Sentence: %s\n\n", sentence);
-
-                // ^^^^^^ example usage
-
-                //example of what i want
-
-                //all str funcs should work
-                // /printf("Sentence: %s%d\n", sentence_two, strlen(sentence_two));
-
-                //int sentlen = strlen(string);
-                //printf("Full sent length %d \n", string);
-                int sentlen = strlen(sentence);
-
-                //size_t sentlen = strlen(sentence);
-                //printf("Sentence: %s\n", sentence);
-                /*
-                if (sentlen < 400)
-                {
-                    //printf("Under 400\n");
-                    // if incubation in sentence
-                    if (strstr(sentence, "incubation") != NULL)
-                    {
-
-                        if (strstr(sentence, "day") != NULL)
-                        {
-
-                            // find (if and) where days is mentioned
-                            char word[] = "day";
-                            int word_len = strlen(word);
-                            int sent_len = strlen(sentence);
-
-                            //includes decimal point
-                            int total_digits_allowed = 3;
-                            //printf("Incubation days: %s\n", sentence);
-                            for (int j = total_digits_allowed - 1; j < sent_len - word_len; j++)
-                            {
-                                
-                                char *word_portion = str_slice(sentence, j, j + word_len);
-                                //printf("Word portion: %s\n", word_portion);
-                                if (strcmp(word_portion, word) == 0)
-                                {
-                                    //printf("Incubation days: %s\n", sentence);
-
-                                    char *before_portion = str_slice(sentence, j - total_digits_allowed - 1, j);
-                                    //printf("Before portion: %s\n", before_portion);
-
-                                    const int unformatted_num_len = strlen(before_portion);
-
-                                    char float_str[unformatted_num_len];
-
-                                    int good_vals = 0;
-                                    for (int k = 0; k < unformatted_num_len; k++)
-                                    {
-                                        // get ascii val
-                                        char val = before_portion[k];
-                                        float_str[k] = ' ';
-                                        if (((int)val >= 48 && (int)val <= 57) || (int)val == 46)
-                                        {
-                                            printf("Val %c is a digit/decimal point \n", val);
-                                            //fill float with blank just in case; it can be overrided
-
-                                            float_str[good_vals] = val;
-                                            good_vals++;
-                                        }
-                                    }
-                                    float_str[unformatted_num_len - 1] = '\0';
-
-                                    //printf("Float str: %s\n", float_str);
-
-                                    //convert float to str
-
-                                    float inc_val = 0;
-                                    sscanf(float_str, "%f", &inc_val);
-
-                                    printf("Float: %9.6f \n", inc_val);
-                                    //amnt++;
-                                    //total_incubation = total_incubation + inc_val;
-                                }
-                                free(word_portion);
-                                
-                            }
-                        }
-                    }
-                }
-                */
-                free(sentence);
-                //free(sentlen);
+                //printf("Sent len %d\n", sent_len);
+                //cout << "Sent: " << sentence << endl;
+                total_sentences.push_back(sentence);
                 prev_scentence_index = i;
                 //sentence_amount += 1;
             }
         }
+
+        for (int i = 0; i < total_sentences.size(); i++)
+        {
+            string sentence = total_sentences[i];
+            string word = "incubation";
+            string time = "day";
+
+            if (sentence.find(word) != string::npos)
+            {
+                if (sentence.find(time) != string::npos)
+                {
+                    cout << "Incubation Sentence: " << sentence << endl;
+                }
+            }
+        }
+        //printf("-----------------\n");
 
         item = item->next;
     }
