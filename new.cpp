@@ -104,9 +104,9 @@ void parse_array(cJSON *array)
                     {
                         cout << "Low Inc Sent: " << sentence << endl;
 
-                        const regex r("(\\b(?=.\\w*day\\w*)\\b)");
+                        const regex r("(?=.[\\d.]+)\\s+(\\S+)(\\b(?=.\\w*day\\w*)\\b)");
                         smatch sm;
-                            
+                        /*
                         if (regex_search(sentence, sm, r))
                         {
                             printf("Regex match\n");
@@ -116,14 +116,29 @@ void parse_array(cJSON *array)
                                 cout << "test" << endl;
 
                                 // iterate through str
-                                /*
-                                for (int j = 0; j < sm[i].size(); j++)
-                                {
-                                    char char_of_phrase = sm[i[j];
-                                    printf("Char: %c\n", char_of_phrase);
-                                }
-                                */
+                                
                             }
+                        }
+                        */
+                        /*
+                        while (regex_search(sentence, sm, r))
+                        {
+                            for (auto x : sm)
+                            {
+                                std::cout << "look" << x << " ";
+                            }
+
+                            std::cout << std::endl;
+                            sentence = sm.suffix().str();
+                        }
+                        */
+                        std::sregex_iterator next(sentence.begin(), sentence.end(), r);
+                        std::sregex_iterator end;
+                        while (next != end)
+                        {
+                            std::smatch match = *next;
+                            std::cout << match.str() << " LOOK \n";
+                            next++;
                         }
                     }
                 }
