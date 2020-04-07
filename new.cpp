@@ -138,6 +138,32 @@ void parse_array(cJSON *array)
                         {
                             std::smatch match = *next;
                             std::cout << match.str() << " LOOK \n";
+                            string mainmatch = match.str();
+                            int n = mainmatch.length();
+
+                            // declaring character array
+                            char mainmatcharr[n + 1];
+
+                            // copying the contents of the
+                            // string to char array
+                            strcpy(mainmatcharr, mainmatch.c_str());
+                            try
+                            {
+                                float inc_val = 0;
+
+                                sscanf(mainmatcharr, "%f", &inc_val);
+
+                                printf("Float: %9.6f \n", inc_val);
+                                if (inc_val < 100.0)
+                                {
+                                    total_incubation = total_incubation + inc_val;
+                                    amnt++;
+                                }
+                            }
+                            catch (...)
+                            {
+                                printf("Couldnt be converted\n");
+                            }
                             next++;
                         }
                     }
