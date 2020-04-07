@@ -12,6 +12,7 @@
 #include <iostream>
 #include <string.h>
 #include <vector>
+#include <regex>
 using namespace std;
 //#include <regex.h>
 double total_incubation = 0;
@@ -79,7 +80,6 @@ void parse_array(cJSON *array)
 
                 string sentence = string_text_str.substr(prev_scentence_index, i);
                 //cout << "Sent: " << sentence << endl;
-                int sent_len = sentence.size();
 
                 //printf("Sent len %d\n", sent_len);
                 //cout << "Sent: " << sentence << endl;
@@ -92,14 +92,40 @@ void parse_array(cJSON *array)
         for (int i = 0; i < total_sentences.size(); i++)
         {
             string sentence = total_sentences[i];
-            string word = "incubation";
-            string time = "day";
+            string word = "incubation ";
+            string time = "day ";
 
             if (sentence.find(word) != string::npos)
             {
                 if (sentence.find(time) != string::npos)
                 {
-                    cout << "Incubation Sentence: " << sentence << endl;
+                    int sent_len = sentence.size();
+                    if (sent_len < 400)
+                    {
+                        cout << "Low Inc Sent: " << sentence << endl;
+
+                        const regex r("(\\b(?=.\\w*day\\w*)\\b)");
+                        smatch sm;
+                            
+                        if (regex_search(sentence, sm, r))
+                        {
+                            printf("Regex match\n");
+                            for (int j = 0; j < sm.size(); j++)
+                            {
+                                string phrase = sm.str(j);
+                                cout << "test" << endl;
+
+                                // iterate through str
+                                /*
+                                for (int j = 0; j < sm[i].size(); j++)
+                                {
+                                    char char_of_phrase = sm[i[j];
+                                    printf("Char: %c\n", char_of_phrase);
+                                }
+                                */
+                            }
+                        }
+                    }
                 }
             }
         }
