@@ -13,34 +13,12 @@
 #include <string.h>
 #include <vector>
 #include <regex>
+
 using namespace std;
-//#include <regex.h>
+
 double total_incubation = 0;
 long amnt = 1;
-/*
-char *str_slice(char str[], int slice_from, int slice_to)
-{
 
-    char *buffer;
-    size_t str_len, buffer_len;
-
-    if (slice_from >= 0 && slice_to > slice_from)
-    {
-        str_len = strlen(str);
-
-        // if "slice_from" goes beyond permissible limits
-        if (slice_from > str_len - 1)
-            return NULL;
-
-        buffer_len = slice_to - slice_from;
-        str += slicoe_from;
-    }
-
-    buffer = calloc(buffer_len, sizeof(char));
-    strncpy(buffer, str, buffer_len);
-    return buffer;
-}
-*/
 int is_regular_file(const char *path)
 {
 	struct stat path_stat;
@@ -65,7 +43,6 @@ void parse_array(cJSON *array)
 		// split into sentences
 
 		int length = strlen(string_text);
-		//char sentences[];
 
 		int prev_scentence_index = 0;
 
@@ -106,32 +83,7 @@ void parse_array(cJSON *array)
 
 						const regex r("(?=.[\\d.]+)\\s+(\\S+)(\\b(?=.\\w*day\\w*)\\b)");
 						smatch sm;
-						/*
-                        if (regex_search(sentence, sm, r))
-                        {
-                            printf("Regex match\n");
-                            for (int j = 0; j < sm.size(); j++)
-                            {
-                                string phrase = sm.str(j);
-                                cout << "test" << endl;
 
-                                // iterate through str
-                                
-                            }
-                        }
-                        */
-						/*
-                        while (regex_search(sentence, sm, r))
-                        {
-                            for (auto x : sm)
-                            {
-                                std::cout << "look" << x << " ";
-                            }
-
-                            std::cout << std::endl;
-                            sentence = sm.suffix().str();
-                        }
-                        */
 						std::sregex_iterator next(sentence.begin(), sentence.end(), r);
 						std::sregex_iterator end;
 						while (next != end)
@@ -179,9 +131,6 @@ void parse_array(cJSON *array)
 
 		item = item->next;
 	}
-
-	//cJSON_Delete(array);
-	//free(array);
 }
 
 long filenum = 0;
@@ -327,34 +276,21 @@ int main()
 					/* confirm we have read the file by
                     outputing it to the console */
 
-					//VALUE IS IN BUFFER
-
-					//printf("\nThe file called test.dat contains this text\n\n");
+					// VALUE IS IN BUFFER
 
 					cJSON *json = cJSON_Parse(buffer);
+
 					/* free the memory we used for the buffer */
 					free(buffer);
-					printf("Deallocated\n");
-					/*
-                    char *string = cJSON_Print(json);
-                    if (string == NULL)
-                    {
-                        fprintf(stderr, "Failed to print monitor.\n");
-                    }
 
-                    printf("CJSONP: %s \n", string);
-                    */
+					printf("Deallocated\n");
 
 					cJSON *texts = cJSON_GetObjectItemCaseSensitive(json, "body_text");
 					//parse_array(cJSON_GetObjectItem(json, "body_text"));
 					parse_array(texts);
-					//scJSON_Delete(texts);
-					// remember to deallocate
-					//cJSON_Delete(texts);
+
 					cJSON_Delete(json);
 
-					// FOR DEVELOPMENT in 1 file
-					//break;
 					filenum++;
 				}
 			}
