@@ -159,6 +159,11 @@ void parse_array(cJSON *array)
                                     total_incubation = total_incubation + inc_val;
                                     amnt++;
                                 }
+                                else
+                                {
+                                    cout << "Bad inc val: ";
+                                    cout << inc_val << endl;
+                                }
                             }
                             catch (...)
                             {
