@@ -13,3 +13,5 @@ test.c
 .gitignore
 
 custom.cpp
+
+*.o
