@@ -2,7 +2,6 @@
 // g++ cJSON.c main.cpp -lm && a.exe
 #include <dirent.h>
 #include <cstdio>
-#include <stdlib.h>
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -18,6 +17,18 @@ using namespace std;
 
 double total_incubation = 0;
 long amnt = 1;
+
+void print(vector<string> vect)
+{
+	// string all = "";
+	// for (string x : vect)
+	// {
+	// 	all.append(x);
+	// 	all.append(" ");
+	// }
+
+	// cout << all << endl;
+}
 
 int is_regular_file(const char *path)
 {
@@ -46,8 +57,10 @@ void parse_array(cJSON *array)
 
 		int prev_scentence_index = 0;
 
+		string word = "incubation ";
+		string time = "day ";
 		//do not check for sentence end if last char (there wont be a char in front)
-		vector<string> total_sentences;
+
 		for (int i = 0; i < length - 1; i++)
 		{
 
@@ -56,81 +69,67 @@ void parse_array(cJSON *array)
 			{
 
 				string sentence = string_text_str.substr(prev_scentence_index, i);
-				//cout << "Sent: " << sentence << endl;
 
-				//printf("Sent len %d\n", sent_len);
-				//cout << "Sent: " << sentence << endl;
-				total_sentences.push_back(sentence);
+				if (sentence.find(word) != string::npos)
+				{
+					if (sentence.find(time) != string::npos)
+					{
+						int sent_len = sentence.size();
+						if (sent_len < 400)
+						{
+							print({"Sentence with time mentioned:  ", sentence});
+
+							const regex r("(?=.[\\d.]+)\\s+(\\S+)(\\b(?=.\\w*day\\w*)\\b)");
+							smatch sm;
+
+							std::sregex_iterator next(sentence.begin(), sentence.end(), r);
+							std::sregex_iterator end;
+							while (next != end)
+							{
+								std::smatch match = *next;
+								print({"LOOK", match.str()});
+								string mainmatch = match.str();
+								int n = mainmatch.length();
+
+								// declaring character array
+								char mainmatcharr[n + 1];
+
+								// copying the contents of the
+								// string to char array
+								strcpy(mainmatcharr, mainmatch.c_str());
+								try
+								{
+									float current_incubation_val = 0;
+
+									sscanf(mainmatcharr, "%f", &current_incubation_val);
+
+									if (current_incubation_val < 100.0)
+									{
+										total_incubation = total_incubation + current_incubation_val;
+										amnt++;
+									}
+								}
+								catch (...)
+								{
+									print({"Couldnt be converted\n"});
+								}
+								next++;
+							}
+						}
+					}
+				}
+
 				prev_scentence_index = i;
 				//sentence_amount += 1;
 			}
 		}
 
-		for (int i = 0; i < total_sentences.size(); i++)
-		{
-			string sentence = total_sentences[i];
-			string word = "incubation ";
-			string time = "day ";
-
-			if (sentence.find(word) != string::npos)
-			{
-				if (sentence.find(time) != string::npos)
-				{
-					int sent_len = sentence.size();
-					if (sent_len < 400)
-					{
-						cout << "Low Inc Sent: " << sentence << endl;
-
-						const regex r("(?=.[\\d.]+)\\s+(\\S+)(\\b(?=.\\w*day\\w*)\\b)");
-						smatch sm;
-
-						std::sregex_iterator next(sentence.begin(), sentence.end(), r);
-						std::sregex_iterator end;
-						while (next != end)
-						{
-							std::smatch match = *next;
-							std::cout << match.str() << " LOOK \n";
-							string mainmatch = match.str();
-							int n = mainmatch.length();
-
-							// declaring character array
-							char mainmatcharr[n + 1];
-
-							// copying the contents of the
-							// string to char array
-							strcpy(mainmatcharr, mainmatch.c_str());
-							try
-							{
-								float inc_val = 0;
-
-								sscanf(mainmatcharr, "%f", &inc_val);
-
-								printf("Float: %9.6f \n", inc_val);
-								if (inc_val < 100.0)
-								{
-									total_incubation = total_incubation + inc_val;
-									amnt++;
-								}
-								else
-								{
-									cout << "Bad inc val: ";
-									cout << inc_val << endl;
-								}
-							}
-							catch (...)
-							{
-								printf("Couldnt be converted\n");
-							}
-							next++;
-						}
-					}
-				}
-			}
-		}
-		//printf("-----------------\n");
+		free(string_text);
 
 		item = item->next;
 	}
+
+	cJSON_Delete(item);
 }
 
 long filenum = 0;
@@ -139,30 +138,7 @@ int main()
 
 	char dircontainer[] = "C:\\Users\\leome\\Downloads\\CORD-19-research-challenge\\";
 
-	struct dirent *direntp = NULL;
-	DIR *dirp = NULL;
-	dirp = opendir(dircontainer);
-
-	int dir_amnt = 0;
-
-	while ((direntp = readdir(dirp)) != NULL)
-	{
-		struct stat fstat;
-
-		/* Print only if it is really directory. */
-		if (!is_regular_file(direntp->d_name))
-		{
-			if (!(direntp->d_name[0] == '.'))
-			{
-
-				dir_amnt++;
-			}
-		}
-	}
-
-	const int size = dir_amnt;
-	char names[size][90];
-	printf("Total dirs: %d\n", dir_amnt);
+	vector<string> names;
 
 	struct dirent *direntp2 = NULL;
 	DIR *dirp2 = NULL;
@@ -179,46 +155,45 @@ int main()
 			if (!(direntp2->d_name[0] == '.'))
 			{
 
-				//printf("dir: %s\n", direntp2->d_name);
-				strcpy(names[index], direntp2->d_name);
+				names.push_back(direntp2->d_name);
 				index++;
 			}
 		}
 	}
 
-	/* Finalize resources. */
-	(void)closedir(dirp);
+	int directory_amount = names.size();
 
-	//printf("size of nums %s\n", (int)sizeof(names));
-	for (int i = 0; i < size; i++)
+	printf("Total dirs: %d\n", directory_amount);
+
+	/* Finalize resources. */
+	(void)closedir(dirp2);
+
+	for (int i = 0; i < directory_amount; i++)
 	{
 
-		char name[100];
-		strcpy(name, names[i]);
-		printf("Folder Name: %s\n", name);
-		char dirname[25];
+		string dirname = names[i];
+		print({"Folder Name: ", names[i]});
 
-		strcpy(dirname, name);
-		char path_to_dir[90] = "";
+		string path_to_dir = "";
 
 		//IN DATASET DIR, there is only 1 folder with the same name that has files
+		path_to_dir.append(dircontainer);
+		path_to_dir.append(dirname);
+		path_to_dir.append("/");
+		path_to_dir.append(dirname);
 
-		strcat(path_to_dir, dircontainer);
-		strcat(path_to_dir, dirname);
-		strcat(path_to_dir, "/");
-		strcat(path_to_dir, dirname);
+		print({"PATH TO DIR:", path_to_dir});
 
-		printf("PATH TO DIR: %s\n", path_to_dir);
 		DIR *d;
 		struct dirent *dir;
-		d = opendir(path_to_dir);
+		d = opendir(path_to_dir.c_str());
+
 		if (d)
 		{
 			while ((dir = readdir(d)) != NULL)
 			{
 				//printf("Starting to read\n");
-				char filename_from_data_dir[90];
-				strcpy(filename_from_data_dir, dir->d_name);
+				string filename_from_data_dir = dir->d_name;
 
 				//check if its not a special file
 				if (filename_from_data_dir[0] != '.')
@@ -234,19 +209,19 @@ int main()
 					/* open an existing file for reading */
 
 					//create full path
-					char path_to_file[90] = "";
-					strcat(path_to_file, path_to_dir);
-					strcat(path_to_file, "/");
+					string path_to_file = "";
+					path_to_file.append(path_to_dir);
+					path_to_file.append("/");
 
-					strcat(path_to_file, filename_from_data_dir);
-					//printf("Opening %s \n", path_to_file);
-					infile = fopen(path_to_file, "r");
-					printf("Filenum %d\n", filenum);
+					path_to_file.append(filename_from_data_dir);
+					print({"Opening:", path_to_file});
+					infile = fopen(path_to_file.c_str(), "r");
+					// print({"Filenum", filenum});
 
 					/* quit if the file does not exist */
 					if (infile == NULL)
 					{
-						printf("File with path %s doesn't exist. ", path_to_file);
+						printf("File with path %s doesn't exist. ", path_to_file.c_str());
 						return 1;
 					}
 
@@ -269,12 +244,9 @@ int main()
 						return 1;
 					}
 
-					/* copy all the text into the buffer */
+					/* copy all the text from the file into the buffer */
 					fread(buffer, sizeof(char), numbytes, infile);
 					fclose(infile);
-
-					/* confirm we have read the file by
-                    outputing it to the console */
 
 					// VALUE IS IN BUFFER
 
@@ -283,7 +255,7 @@ int main()
 					/* free the memory we used for the buffer */
 					free(buffer);
 
-					printf("Deallocated\n");
+					print({"Deallocated"});
 
 					cJSON *texts = cJSON_GetObjectItemCaseSensitive(json, "body_text");
 					//parse_array(cJSON_GetObjectItem(json, "body_text"));
