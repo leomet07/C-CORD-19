@@ -1,1 +1,1 @@
-mingw32-make  && DEL cJSON.o && DEL main.o && a.exe
+mingw32-make  && DEL cJSON.o && DEL main.o && Made.exe

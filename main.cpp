@@ -12,22 +12,33 @@
 #include <string.h>
 #include <vector>
 #include <regex>
+#include <fstream>
 
 using namespace std;
 
 double total_incubation = 0;
 long amnt = 1;
+bool DISPLAY_STDOUT = false;
+bool WRITE_LOG = false;
+ofstream fout;
+ifstream fin;
 
 void print(vector<string> vect)
 {
-	// string all = "";
-	// for (string x : vect)
-	// {
-	// 	all.append(x);
-	// 	all.append(" ");
-	// }
 
-	// cout << all << endl;
+	string all = "";
+	for (string x : vect)
+	{
+		all.append(x);
+		all.append(" ");
+	}
+
+	if (fin.is_open() && WRITE_LOG)
+		fout << all << endl; // Writing data to file
+	if (DISPLAY_STDOUT)
+	{
+		cout << all << endl;
+	}
 }
 
 int is_regular_file(const char *path)
@@ -120,7 +131,6 @@ void parse_array(cJSON *array)
 				}
 
 				prev_scentence_index = i;
-				//sentence_amount += 1;
 			}
 		}
 
@@ -133,8 +143,18 @@ void parse_array(cJSON *array)
 }
 
 long filenum = 0;
+
+string logfile = "output.log";
+
 int main()
 {
+	if (WRITE_LOG)
+	{
+		// Open log file
+		fin.open(logfile);
+
+		fout.open(logfile, ios::out); // Write mode
+	}
 
 	char dircontainer[] = "C:\\Users\\leome\\Downloads\\CORD-19-research-challenge\\";
 
@@ -147,7 +167,6 @@ int main()
 	int index = 0;
 	while ((direntp2 = readdir(dirp2)) != NULL)
 	{
-		struct stat fstat;
 
 		/* Print only if it is really directory. */
 		if (!is_regular_file(direntp2->d_name))
@@ -273,4 +292,7 @@ int main()
 	//calculate avg
 	double avg = total_incubation / amnt;
 	printf("Avg: %9.6f \n", avg);
+
+	fin.close();
+	fout.close(); // Closing the file
 }
