@@ -1,12 +1,10 @@
-// to compile:
+// To compile:
 // g++ cJSON.c main.cpp -lm && a.exe
 #include <dirent.h>
 #include <cstdio>
-
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
-
 #include "cJSON.h"
 #include <iostream>
 #include <string.h>
@@ -20,6 +18,11 @@ double total_incubation = 0;
 long amnt = 1;
 bool DISPLAY_STDOUT = false;
 bool WRITE_LOG = false;
+
+long filenum = 0;
+
+string logfilename = "output.log";
+
 ofstream fout;
 ifstream fin;
 
@@ -51,7 +54,6 @@ int is_regular_file(const char *path)
 void parse_array(cJSON *array)
 {
 
-	//printf("Parse time: \n");
 	cJSON *item = array ? array->child : 0;
 
 	while (item)
@@ -60,7 +62,6 @@ void parse_array(cJSON *array)
 
 		char *string_text = cJSON_Print(text);
 		std::string string_text_str = string_text;
-		//printf("Entry: %s \n", string_text);
 
 		// split into sentences
 
@@ -70,7 +71,6 @@ void parse_array(cJSON *array)
 
 		string word = "incubation ";
 		string time = "day ";
-		//do not check for sentence end if last char (there wont be a char in front)
 
 		for (int i = 0; i < length - 1; i++)
 		{
@@ -142,18 +142,14 @@ void parse_array(cJSON *array)
 	cJSON_Delete(item);
 }
 
-long filenum = 0;
-
-string logfile = "output.log";
-
 int main()
 {
 	if (WRITE_LOG)
 	{
 		// Open log file
-		fin.open(logfile);
+		fin.open(logfilename);
 
-		fout.open(logfile, ios::out); // Write mode
+		fout.open(logfilename, ios::out); // Write mode
 	}
 
 	char dircontainer[] = "C:\\Users\\leome\\Downloads\\CORD-19-research-challenge\\";
